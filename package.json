@@ -1,0 +1,43 @@
+{
+  "name": "setup-bazelisk",
+  "version": "1.0.0",
+  "private": true,
+  "description": "setup bazelisk action",
+  "main": "lib/setup-bazelisk.js",
+  "scripts": {
+    "build": "tsc && ncc build",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "pre-checkin": "npm run format && npm run build && npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mishas/setup-bazelisk-action.git"
+  },
+  "keywords": [
+    "actions",
+    "bazelisk",
+    "setup"
+  ],
+  "author": "Misha Seltzer",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mishas/setup-bazelisk-action/issues"
+  },
+  "homepage": "https://github.com/mishas/setup-bazelisk-action#readme",
+  "dependencies": {
+    "@actions/cache": "^3.2.3",
+    "@actions/core": "^1.10.1",
+    "@actions/github": "^6.0.0",
+    "@actions/http-client": "^2.2.0",
+    "@actions/tool-cache": "^2.0.1",
+    "cachedir": "^2.4.0",
+    "semver": "^7.5.4"
+  },
+  "devDependencies": {
+    "@types/semver": "^7.5.6",
+    "@vercel/ncc": "^0.38.1",
+    "prettier": "^3.2.4",
+    "typescript": "^5.3.3"
+  }
+}

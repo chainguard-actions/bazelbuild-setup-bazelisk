@@ -1,0 +1,33 @@
+name: Test basic usage (default version)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+      - name: Assert bazel (bazelisk) is on PATH and is a 1.x binary from the tool cache
+        run: |
+          BIN="$(command -v bazel || true)"
+          echo "bazel path: $BIN"
+          if [ -z "$BIN" ]; then
+            echo "FAIL: bazel not found on PATH"
+            exit 1
+          fi
+          if [ ! -x "$BIN" ]; then
+            echo "FAIL: $BIN is not executable"
+            exit 1
+          fi
+          case "$BIN" in
+            */bazelisk/1.*/*/bazel) echo "PASS: path is in tool cache under a 1.x version" ;;
+            *) echo "FAIL: unexpected path layout '$BIN'"; exit 1 ;;
+          esac
+          MAGIC="$(head -c 4 "$BIN" | od -An -c | tr -d ' ')"
+          echo "magic: $MAGIC"
+          if [ "$MAGIC" != "177ELF" ]; then
+            echo "FAIL: bazel binary is not an ELF executable"
+            exit 1
+          fi
+          echo "PASS"

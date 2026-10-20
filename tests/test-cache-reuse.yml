@@ -1,0 +1,44 @@
+name: Test second invocation reuses tool cache
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: first
+        uses: .
+      - name: Record first path
+        id: rec
+        run: |
+          BIN="$(command -v bazel || true)"
+          echo "first: $BIN"
+          if [ -z "$BIN" ]; then
+            echo "FAIL: bazel not on PATH after first run"
+            exit 1
+          fi
+          VER="$(echo "$BIN" | sed -n 's#.*/bazelisk/\([0-9][0-9.]*\)/.*#\1#p')"
+          echo "version=$VER" >> "$GITHUB_OUTPUT"
+          echo "path=$BIN" >> "$GITHUB_OUTPUT"
+      - id: second
+        uses: .
+        with:
+          bazelisk-version: ${{ steps.rec.outputs.version }}
+      - name: Assert same binary is used
+        env:
+          FIRST: ${{ steps.rec.outputs.path }}
+          SECOND_OUTCOME: ${{ steps.second.outcome }}
+        run: |
+          BIN="$(command -v bazel || true)"
+          echo "first: $FIRST"
+          echo "second: $BIN"
+          echo "second outcome: $SECOND_OUTCOME"
+          if [ "$SECOND_OUTCOME" != "success" ]; then
+            echo "FAIL: second invocation did not succeed"
+            exit 1
+          fi
+          if [ "$BIN" != "$FIRST" ]; then
+            echo "FAIL: expected same cached binary"
+            exit 1
+          fi
+          echo "PASS"
